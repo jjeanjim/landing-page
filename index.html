@@ -268,6 +268,22 @@
 </head>
 <body>
 
+<!-- bloquear botão direito  -->
+        document.addEventListener("contextmenu", e => e.preventDefault());
+
+    <!-- bloquear atalhos DevTools  -->
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false; // F12
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // CTRL+SHIFT+I
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // CTRL+SHIFT+J
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // CTRL+U
+        };
+
+    <!-- bloquear iframe  -->
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+}   
+
     <div class="container">
         
         <!-- BARRA DE ALERTA -->
