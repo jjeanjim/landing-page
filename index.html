@@ -338,8 +338,10 @@
             <h2 style="color: #fff; margin-bottom: 20px;">JUNTE-SE À NÓS!</h2>
             
             
-            <a href="https://pay.kiwify.com.br/M9T4tsE" onclick= "fbq('track','InitiateCheckout')" class="btn-download">
-                Comunidade Ativa.
+            <a href="https://pay.kiwify.com.br/M9T4tsE"
+            class="btn-download"
+            onclick="fbq('track','InitiateCheckout'); setTimeout(()=>{window.location.href=this.href},300); return false;">
+            Comunidade Ativa
             </a>
             
             <span class="download-code">> EXECUTING DOWNLOAD PROTOCOL... [v1.0]</span>
