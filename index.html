@@ -280,6 +280,7 @@
     'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '1978950053050055');
     fbq('track', 'PageView');
+    fbq('track','ViewContent');
     
 </script>
 
@@ -338,13 +339,13 @@
             <h2 style="color: #fff; margin-bottom: 20px;">JUNTE-SE À NÓS!</h2>
             
             
-            <a href="https://pay.kiwify.com.br/M9T4tsE"
-            class="btn-download"
-            onclick="fbq('track','InitiateCheckout'); setTimeout(()=>{window.location.href=this.href},300); return false;">
-            Comunidade Ativa
-            </a>
-            
-            <span class="download-code">> EXECUTING DOWNLOAD PROTOCOL... [v1.0]</span>
+        <a href="https://pay.kiwify.com.br/M9T4tsE"
+        class="btn-download"
+        onclick="handleCheckout(event)">
+        Comunidade Ativa
+        </a>
+
+          <span class="download-code">> EXECUTING DOWNLOAD PROTOCOL... [v1.0]</span>
         </div>
 
         <!-- MÓDULOS DE SERVIÇO -->
@@ -374,5 +375,17 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script defer src="/_vercel/insights/script.js"></script>
+
+    <script>
+        function handleCheckout(e){
+        e.preventDefault();
+
+        fbq('track','InitiateCheckout');
+
+        setTimeout(function(){
+            window.location.href="https://pay.kiwify.com.br/M9T4tsE";
+        },700);
+    }
+    </script>
 </body>
 </html>
