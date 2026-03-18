@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
+  // 1. Bloqueia métodos que não sejam POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
@@ -8,40 +9,41 @@ export default async function handler(req, res) {
   try {
     const body = req.body;
 
-    // 1. Log para debug (Verifique isso no console da Vercel)
-    console.log('--- NOVO WEBHOOK RECEBIDO ---');
-    console.log('Status da Ordem:', body.order_status);
+    // 2. Log de segurança para você ver na Vercel se a Kiwify bateu lá
+    console.log('--- WEBHOOK HAJIME RECEBIDO ---');
+    console.log('Status:', body.order_status);
 
-    // 2. Filtro: Processa apenas quando o pagamento é confirmado (status: paid)
-    // Se você estiver usando o botão "Enviar Teste" da Kiwify, o status pode ser diferente.
+    // 3. Filtro: Kiwify envia 'paid' para aprovado. Se não for, para aqui.
     if (body.order_status !== 'paid') {
-      console.log('Evento ignorado. Status não é "paid".');
-      return res.status(200).send('Evento ignorado (não é pago)');
+      return res.status(200).send('Evento recebido, mas não processado (status != paid)');
     }
 
-    // 3. Extração de dados seguindo o padrão Kiwify
-    const email = body.email;
-    const value = (body.total_price_cents || 0) / 100; // Converte centavos para Real
-    const event_id = body.order_id || `kw-${Date.now()}`;
+    // 4. Mapeamento de dados (Kiwify envia na raiz, sem o .data)
+    const email = body.email || '';
+    const order_id = body.order_id || `kw-${Date.now()}`;
+    const value = (body.total_price_cents || 0) / 100;
 
-    // 4. Função de Hash SHA256 (Padrão Facebook)
-    const hash = (data) =>
-      crypto.createHash('sha256').update(data.trim().toLowerCase()).digest('hex');
+    // 5. Preparação do User Data (Hash SHA256)
+    const hash = (str) => 
+      crypto.createHash('sha256').update(str.trim().toLowerCase()).digest('hex');
 
-    const user_data = {};
+    const user_data = {
+      client_ip_address: req.headers['x-forwarded-for']?.split(',')[0] || req.socket?.remoteAddress,
+      client_user_agent: req.headers['user-agent']
+    };
+
     if (email) {
-      user_data.em = [hash(email)]; // Facebook espera um Array de strings hasheadas
+      user_data.em = [hash(email)];
     }
 
-    // 5. Payload para a API de Conversões do Facebook
+    // 6. Payload para a API de Conversões da Meta
     const payload = {
       data: [
         {
           event_name: 'Purchase',
           event_time: Math.floor(Date.now() / 1000),
-          event_id: event_id,
+          event_id: order_id,
           action_source: 'website',
-          event_source_url: body.product_url || '', // Opcional: URL do produto
           custom_data: {
             value: value,
             currency: 'BRL'
@@ -51,7 +53,7 @@ export default async function handler(req, res) {
       ]
     };
 
-    // 6. Envio para o Facebook
+    // 7. Disparo para o Facebook
     const fbRes = await fetch(
       `https://graph.facebook.com/v19.0/${process.env.FB_PIXEL_ID}/events?access_token=${process.env.FB_ACCESS_TOKEN}`,
       {
@@ -62,17 +64,12 @@ export default async function handler(req, res) {
     );
 
     const fbData = await fbRes.json();
+    console.log('--- RESPOSTA FACEBOOK ---', fbData);
 
-    console.log('🔥 RESPOSTA FACEBOOK:', fbData);
-
-    // Retorna 200 para a Kiwify não tentar reenviar o webhook
-    return res.status(200).json({
-      success: true,
-      fb_response: fbData
-    });
+    return res.status(200).json({ success: true, fb_response: fbData });
 
   } catch (err) {
-    console.error('❌ ERRO NO PROCESSAMENTO:', err.message);
-    return res.status(500).json({ error: 'Erro interno no servidor' });
+    console.error('❌ ERRO CRÍTICO:', err.message);
+    return res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 }
