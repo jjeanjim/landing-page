@@ -248,37 +248,39 @@
 <script defer src="/_vercel/insights/script.js"></script>
 
 <script>
-    function gerarEventID() {
-        return 'evt_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-    }
+function gerarEventID() {
+    return 'evt_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+}
 
-    function handleCheckout(e){
-        e.preventDefault();
+function handleCheckout(e){
+    e.preventDefault();
 
-        const eventID = gerarEventID();
+    const eventID = gerarEventID();
 
-        // Pixel
-        fbq('track', 'Lead', {}, { eventID });
-        fbq('track', 'InitiateCheckout');
+    // Evento CORRETO
+    fbq('track', 'InitiateCheckout', {
+        content_name: 'Comunidade Ativa',
+        currency: 'BRL'
+    }, {
+        eventID: eventID
+    });
 
-        // API Server
-        fetch('/api/facebook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                event_name: 'Lead',
-                event_id: eventID,
-                email: null
-            })
-        }).catch(() => {});
+    // (Opcional) enviar também pela API
+    fetch('/api/facebook', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            event_name: 'InitiateCheckout',
+            event_id: eventID
+        })
+    }).catch(() => {});
 
-        // Redirecionamento
-        setTimeout(() => {
-            window.location.href = "https://pay.kiwify.com.br/M9T4tsE";
-        }, 700);
-    }
+    setTimeout(() => {
+        window.location.href = "https://pay.kiwify.com.br/M9T4tsE";
+    }, 600);
+}
 </script>
 
 </body>
