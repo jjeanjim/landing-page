@@ -20,21 +20,25 @@ export default async function handler(req, res) {
 
     const userAgent = req.headers['user-agent'];
 
-    const payload = {
-      data: [
-        {
-          event_name,
-          event_time: Math.floor(Date.now() / 1000),
-          event_id,
-          action_source: 'website',
-          user_data: {
-            client_ip_address: ip,
-            client_user_agent: userAgent
-          }
-        }
-      ],
-      access_token: process.env.FB_ACCESS_TOKEN
-    };
+            const payload = {
+        data: [
+            {
+            event_name,
+            event_time: Math.floor(Date.now() / 1000),
+            event_id,
+            action_source: 'website',
+
+            // 🔥 IMPORTANTE
+            custom_data: {
+                value: value,
+                currency: currency || 'BRL'
+            },
+
+            user_data
+            }
+        ],
+        access_token: process.env.FB_ACCESS_TOKEN
+        };
 
     console.log('ENVIANDO:', payload);
 

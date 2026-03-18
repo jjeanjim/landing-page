@@ -276,8 +276,13 @@
             const fbp = getCookie('_fbp');
             const fbc = getFbc();
 
+            const valor = 47.00;
+
             // 🔥 Pixel (browser)
-            fbq('track', 'InitiateCheckout', {}, { eventID });
+            fbq('track', 'InitiateCheckout', {
+                value: valor,
+                currency: 'BRL'
+            }, { eventID });
 
             // 🔥 API (server)
             try {
@@ -289,6 +294,8 @@
                     body: JSON.stringify({
                         event_name: 'InitiateCheckout',
                         event_id: eventID,
+                        value: valor,
+                        currency: 'BRL',
                         fbp: fbp,
                         fbc: fbc
                     })
@@ -296,7 +303,7 @@
             } catch (err) {
                 console.error('Erro API:', err);
             }
-
+            
             setTimeout(() => {
                 window.location.href = "https://pay.kiwify.com.br/M9T4tsE";
             }, 500);
