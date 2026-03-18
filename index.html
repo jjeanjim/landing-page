@@ -8,8 +8,20 @@
     <!-- --- FONTES HACKER --- -->
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 
-    <!-- Font Awesome (mover para o head) -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+        <script>
+    (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fbclid = urlParams.get('fbclid');
+
+        if (fbclid) {
+            const fbc = `fb.1.${Date.now()}.${fbclid}`;
+            document.cookie = `_fbc=${fbc}; path=/; max-age=7776000`;
+        }
+    })();
+    </script>
 
     <style>
         :root {
@@ -258,23 +270,20 @@
             return match ? match[2] : null;
         }
 
-        // 🔥 gerar fbc (se vier de anúncio)
-        function getFbc() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const fbclid = urlParams.get('fbclid');
 
-            if (!fbclid) return null;
-
-            return `fb.1.${Date.now()}.${fbclid}`;
-        }
-
+        
         async function handleCheckout(e){
             e.preventDefault();
 
             const eventID = gerarEventID();
 
-            const fbp = getCookie('_fbp');
-            const fbc = getFbc();
+            let fbp = getCookie('_fbp');
+            const fbc = getCookie('_fbc');
+
+            if (!fbp) {
+            fbp = `fb.1.${Date.now()}.${Math.random().toString().substring(2, 10)}`;
+            document.cookie = `_fbp=${fbp}; path=/; max-age=7776000`;
+}
 
             const valor = 47.00;
 
