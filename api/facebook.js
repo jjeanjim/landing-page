@@ -19,15 +19,14 @@ export default async function handler(req, res) {
 
     const userAgent = req.headers['user-agent'];
 
-            const payload = {
+        const payload = {
         data: [
             {
             event_name,
             event_time: Math.floor(Date.now() / 1000),
             event_id,
             action_source: 'website',
-
-            // 🔥 IMPORTANTE
+            test_event_code: 'TEST83702',
             custom_data: {
                 value: value,
                 currency: currency || 'BRL'
