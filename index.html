@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYSTEM BREACH // [HAJIME]</title>
 
-    <!-- --- FONTES HACKER --- -->
+    <!-- --- FONTES --- -->
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
@@ -264,7 +264,7 @@
             return 'evt_' + Date.now() + '_' + Math.random().toString(36).substring(2);
         }
 
-        // 🔥 pegar cookie
+        // pegar cookie
         function getCookie(name) {
             const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
             return match ? match[2] : null;
@@ -287,13 +287,13 @@
 
             const valor = 29.90;
 
-            // 🔥 Pixel (browser)
+            // Pixel (browser)
             fbq('track', 'InitiateCheckout', {
                 value: valor,
                 currency: 'BRL'
             }, { eventID });
 
-            // 🔥 API (server)
+            // aPI (server)
             try {
                 await fetch('/api/facebook', {
                     method: 'POST',

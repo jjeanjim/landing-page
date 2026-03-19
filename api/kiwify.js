@@ -11,21 +11,21 @@ export default async function handler(req, res) {
     console.log('--- WEBHOOK HAJIME RECEBIDO ---');
     console.log('Status:', body.order_status);
 
-    // 🔥 Só processa pagamento aprovado
+    
     if (body.order_status !== 'paid') {
       return res.status(200).send('Evento ignorado (status != paid)');
     }
 
-    // 🔥 DADOS DA KIWIFY
+
     const email = body.email || '';
     const order_id = body.order_id || `kw-${Date.now()}`;
     const value = (body.total_price_cents || 0) / 100;
 
-    // 🔥 HASH SHA256
+    
     const hash = (str) =>
       crypto.createHash('sha256').update(str.trim().toLowerCase()).digest('hex');
 
-    // 🔥 USER DATA
+    
     const user_data = {
       client_ip_address:
         req.headers['x-forwarded-for']?.split(',')[0] ||
@@ -38,7 +38,8 @@ export default async function handler(req, res) {
       user_data.em = [hash(email)];
     }
 
-    // 🔥 PAYLOAD
+    const currency = (body.currency || 'BRL').toUpperCase();
+
     const payload = {
       data: [
         {
@@ -49,7 +50,7 @@ export default async function handler(req, res) {
 
           custom_data: {
             value: value,
-            currency: 'BRL'
+            currency: currency,
           },
 
           user_data: user_data
@@ -58,13 +59,13 @@ export default async function handler(req, res) {
       access_token: process.env.FB_ACCESS_TOKEN
     };
 
-    // 🔥 DEBUG (IMPORTANTE)
+    
     console.log('TOKEN:', process.env.FB_ACCESS_TOKEN ? 'OK' : 'MISSING');
-    console.log('PIXEL:', process.env.ID_PIXEL_FB);
+    console.log('PIXEL:', process.env.FB_PIXEL_ID);
 
-    // 🔥 ENVIO PRA META
+    
     const fbRes = await fetch(
-      `https://graph.facebook.com/v19.0/${process.env.ID_PIXEL_FB}/events`,
+      `https://graph.facebook.com/v19.0/${process.env.FB_PIXEL_ID}/events`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -11,7 +11,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing data' });
     }
 
-    // 🔥 Captura automática do usuário
+    
     const ip =
       req.headers['x-forwarded-for']?.split(',')[0] ||
       req.socket?.remoteAddress ||
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     console.log('ENVIANDO:', payload);
 
     const fbRes = await fetch(
-      `https://graph.facebook.com/v19.0/${process.env.ID_PIXEL_FB}/events`,
+      `https://graph.facebook.com/v19.0/${process.env.FB_PIXEL_ID}/events`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
