@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     console.log('ENVIANDO:', payload);
 
     const fbRes = await fetch(
-      `https://graph.facebook.com/v19.0/${process.env.FB_PIXEL_ID}/events`,
+      `https://graph.facebook.com/v19.0/${process.env.ID_PIXEL_FB}/events`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
