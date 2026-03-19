@@ -11,21 +11,17 @@ export default async function handler(req, res) {
     console.log('--- WEBHOOK HAJIME RECEBIDO ---');
     console.log('Status:', body.order_status);
 
-    
     if (body.order_status !== 'paid') {
       return res.status(200).send('Evento ignorado (status != paid)');
     }
-
 
     const email = body.email || '';
     const order_id = body.order_id || `kw-${Date.now()}`;
     const value = (body.total_price_cents || 0) / 100;
 
-    
     const hash = (str) =>
       crypto.createHash('sha256').update(str.trim().toLowerCase()).digest('hex');
 
-    
     const user_data = {
       client_ip_address:
         req.headers['x-forwarded-for']?.split(',')[0] ||
@@ -40,6 +36,7 @@ export default async function handler(req, res) {
 
     const currency = (body.currency || 'BRL').toUpperCase();
 
+    // 1. Definição do Payload (apenas os dados do evento)
     const payload = {
       data: [
         {
@@ -47,25 +44,25 @@ export default async function handler(req, res) {
           event_time: Math.floor(Date.now() / 1000),
           event_id: order_id,
           action_source: 'website',
-
           custom_data: {
             value: value,
             currency: currency,
           },
-
           user_data: user_data
         }
-      ],
-      access_token: process.env.FB_ACCESS_TOKEN
+      ]
     };
 
-    
-    console.log('TOKEN:', process.env.FB_ACCESS_TOKEN ? 'OK' : 'MISSING');
-    console.log('PIXEL:', process.env.FB_PIXEL_ID);
+    // 2. Variáveis de Ambiente
+    const PIXEL_ID = process.env.FB_PIXEL_ID;
+    const ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
 
-    
+    console.log('TOKEN STATUS:', ACCESS_TOKEN ? 'OK' : 'MISSING');
+    console.log('PIXEL ID:', PIXEL_ID || 'UNDEFINED');
+
+    // 3. Envio para o Facebook (Token na URL garante maior compatibilidade)
     const fbRes = await fetch(
-      `https://graph.facebook.com/v19.0/${process.env.FB_PIXEL_ID}/events`,
+      `https://graph.facebook.com/v19.0/${PIXEL_ID}/events?access_token=${ACCESS_TOKEN}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
