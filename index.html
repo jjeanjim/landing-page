@@ -272,51 +272,44 @@
 
 
         
-    async function handleCheckout(e) {
-        e.preventDefault(); // Para o navegador não sair da página antes do tempo
-
-        const eventID = gerarEventID();
-        let fbp = getCookie('_fbp');
-        const fbc = getCookie('_fbc');
-
-        if (!fbp) {
-            fbp = `fb.1.${Date.now()}.${Math.random().toString().substring(2, 10)}`;
-            document.cookie = `_fbp=${fbp}; path=/; max-age=7776000`;
-        }
-
-        const valor = 29.90;
-
+        async function handleCheckout(e) {
+        e.preventDefault(); 
+        const urlDestino = "https://pay.kiwify.com.br/M9T4tsE";
         
+        console.group("HAJIME TRACKING SYSTEM");
+        console.log("Status: Iniciando captura...");
+
+        // 1. DISPARO DO PIXEL (Obrigatório para aparecer no Gerenciador)
         if (typeof fbq !== 'undefined') {
             fbq('track', 'InitiateCheckout', {
-                value: valor,
+                value: 29.90,
                 currency: 'BRL'
-            }, { eventID: eventID }); 
-            console.log('Hajime: Pixel disparado via Browser');
+            });
+            console.log("Status: Sinal enviado para Meta.");
+        } else {
+            console.error("Erro: SDK do Facebook não carregado.");
         }
 
-        
-        try {
-            fetch('/api/facebook', { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    event_name: 'InitiateCheckout',
-                    event_id: eventID,
-                    value: valor,
-                    currency: 'BRL',
-                    fbp: fbp,
-                    fbc: fbc
-                })
-            });
-        } catch (err) {
-            console.error('Erro API:', err);
-        }
-        
-        
+        // 2. DISPARO PARA SUA API (Backup na Vercel)
+        // Usamos o fetch sem 'await' para ele correr em paralelo
+        fetch('/api/facebook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_name: 'InitiateCheckout',
+                value: 29.90,
+                currency: 'BRL'
+            })
+        }).then(() => console.log("Status: Backup Vercel concluído."));
+
+        console.log("Aguardando confirmação do navegador (1000ms)...");
+        console.groupEnd();
+
+        // 3. O TEMPO DE RESPIRO
+        // 1 segundo é o tempo padrão para garantir que o 'tr/' apareça no Network
         setTimeout(() => {
-            window.location.href = "https://pay.kiwify.com.br/M9T4tsE";
-        }, 2000);
+            window.location.href = urlDestino;
+        }, 1000); 
     }
 </script>
 
