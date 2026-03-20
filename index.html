@@ -224,10 +224,10 @@
     <!-- DOWNLOAD ZONE -->
     <div class="download-zone">
     <h2 style="color: #fff; margin-bottom: 20px;">JUNTE-SE À NÓS!</h2>
-    <a href="https://pay.kiwify.com.br/M9T4tsE"
-    class="btn-download"
-    id="compra-comunidade"
-    onclick="handleCheckout(event)"> Comunidade Ativa
+    <a href="https://pay.kiwify.com.br/M9T4tsE" 
+        class="btn-download" 
+        id="compra-comunidade" 
+        onclick="handleCheckout(event)"> Comunidade Ativa
     </a>
     <span class="download-code">> EXECUTING DOWNLOAD PROTOCOL... [v1.0]</span>
 </div>
@@ -260,56 +260,46 @@
 <script defer src="/_vercel/insights/script.js"></script>
 
 <script>
-        function gerarEventID() {
-            return 'evt_' + Date.now() + '_' + Math.random().toString(36).substring(2);
-        }
+    function gerarEventID() {
+        return 'evt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    }
 
-        // pegar cookie
-        function getCookie(name) {
-            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-            return match ? match[2] : null;
-        }
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+    }
 
-
+    async function handleCheckout(e) {
+        e.preventDefault();
         
-        async function handleCheckout(e) {
-        e.preventDefault(); 
         const urlDestino = "https://pay.kiwify.com.br/M9T4tsE";
-        
-        console.group("HAJIME TRACKING SYSTEM");
-        console.log("Status: Iniciando captura...");
+        const eventID = gerarEventID();
+        const fbp = getCookie('_fbp');
+        const fbc = getCookie('_fbc');
 
-        // 1. DISPARO DO PIXEL (Obrigatório para aparecer no Gerenciador)
         if (typeof fbq !== 'undefined') {
             fbq('track', 'InitiateCheckout', {
                 value: 29.90,
                 currency: 'BRL'
-            });
-            console.log("Status: Sinal enviado para Meta.");
-        } else {
-            console.error("Erro: SDK do Facebook não carregado.");
+            }, { eventID: eventID });
         }
 
-        // 2. DISPARO PARA SUA API (Backup na Vercel)
-        // Usamos o fetch sem 'await' para ele correr em paralelo
         fetch('/api/facebook', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 event_name: 'InitiateCheckout',
+                event_id: eventID,
                 value: 29.90,
-                currency: 'BRL'
+                currency: 'BRL',
+                fbp: fbp,
+                fbc: fbc
             })
-        }).then(() => console.log("Status: Backup Vercel concluído."));
+        });
 
-        console.log("Aguardando confirmação do navegador (1000ms)...");
-        console.groupEnd();
-
-        // 3. O TEMPO DE RESPIRO
-        // 1 segundo é o tempo padrão para garantir que o 'tr/' apareça no Network
         setTimeout(() => {
             window.location.href = urlDestino;
-        }, 1000); 
+        }, 800);
     }
 </script>
 
