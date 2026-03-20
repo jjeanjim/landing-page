@@ -225,31 +225,12 @@
     <div class="download-zone">
     <h2 style="color: #fff; margin-bottom: 20px;">JUNTE-SE À NÓS!</h2>
     <a href="https://pay.kiwify.com.br/M9T4tsE"
-       class="btn-download"
-       id="compra-comunidade">
-       Comunidade Ativa
+    class="btn-download"
+    id="compra-comunidade"
+    onclick="handleCheckout(event)"> Comunidade Ativa
     </a>
     <span class="download-code">> EXECUTING DOWNLOAD PROTOCOL... [v1.0]</span>
 </div>
-
-    <script>
-    document.getElementById('compra-comunidade').addEventListener('click', function(e) {
-        
-        e.preventDefault();
-        const linkKiwify = this.href;
-
-        
-        if (typeof fbq !== 'undefined') {
-            fbq('track', 'InitiateCheckout');
-            console.log('Hajime Sec: Evento enviado!');
-        }
-
-        
-        setTimeout(() => {
-            window.location.href = linkKiwify;
-        }, 400);
-    });
-</script>
 
     <!-- MODULES -->
     <div class="modules-grid">
@@ -291,51 +272,52 @@
 
 
         
-        async function handleCheckout(e){
-            e.preventDefault();
+    async function handleCheckout(e) {
+        e.preventDefault(); // Para o navegador não sair da página antes do tempo
 
-            const eventID = gerarEventID();
+        const eventID = gerarEventID();
+        let fbp = getCookie('_fbp');
+        const fbc = getCookie('_fbc');
 
-            let fbp = getCookie('_fbp');
-            const fbc = getCookie('_fbc');
-
-            if (!fbp) {
+        if (!fbp) {
             fbp = `fb.1.${Date.now()}.${Math.random().toString().substring(2, 10)}`;
             document.cookie = `_fbp=${fbp}; path=/; max-age=7776000`;
-}
+        }
 
-            const valor = 29.90;
+        const valor = 29.90;
 
-            // Pixel (browser)
+        
+        if (typeof fbq !== 'undefined') {
             fbq('track', 'InitiateCheckout', {
                 value: valor,
                 currency: 'BRL'
-            }, { eventID });
-
-            // aPI (server)
-            try {
-                await fetch('/api/facebook', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        event_name: 'InitiateCheckout',
-                        event_id: eventID,
-                        value: valor,
-                        currency: 'BRL',
-                        fbp: fbp,
-                        fbc: fbc
-                    })
-                });
-            } catch (err) {
-                console.error('Erro API:', err);
-            }
-            
-            setTimeout(() => {
-                window.location.href = "https://pay.kiwify.com.br/M9T4tsE";
-            }, 500);
+            }, { eventID: eventID }); 
+            console.log('Hajime: Pixel disparado via Browser');
         }
+
+        
+        try {
+            fetch('/api/facebook', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event_name: 'InitiateCheckout',
+                    event_id: eventID,
+                    value: valor,
+                    currency: 'BRL',
+                    fbp: fbp,
+                    fbc: fbc
+                })
+            });
+        } catch (err) {
+            console.error('Erro API:', err);
+        }
+        
+        
+        setTimeout(() => {
+            window.location.href = "https://pay.kiwify.com.br/M9T4tsE";
+        }, 500);
+    }
 </script>
 
 </body>
