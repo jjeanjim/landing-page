@@ -9,15 +9,25 @@ export default async function handler(req, res) {
     const body = req.body;
 
     console.log('--- WEBHOOK HAJIME RECEBIDO ---');
-    console.log('Status:', body.order_status);
+    console.log('Status Original Kiwify:', body.order_status);
 
-    if (body.order_status !== 'paid') {
-      return res.status(200).send('Evento ignorado (status != paid)');
+  
+    let eventName = '';
+    
+    if (body.order_status === 'paid') {
+      eventName = 'Purchase';
+    } else if (body.order_status === 'waiting_payment') {
+      eventName = 'InitiateCheckout'; 
+    } else {
+      
+      console.log(`Evento ${body.order_status} ignorado.`);
+      return res.status(200).send(`Status ${body.order_status} ignorado`);
     }
 
     const email = body.email || '';
     const order_id = body.order_id || `kw-${Date.now()}`;
     const value = (body.total_price_cents || 0) / 100;
+    const currency = (body.currency || 'BRL').toUpperCase();
 
     const hash = (str) =>
       crypto.createHash('sha256').update(str.trim().toLowerCase()).digest('hex');
@@ -34,16 +44,15 @@ export default async function handler(req, res) {
       user_data.em = [hash(email)];
     }
 
-    const currency = (body.currency || 'BRL').toUpperCase();
-
-    // 1. Definição do Payload (apenas os dados do evento)
+    
     const payload = {
       data: [
         {
-          event_name: 'Purchase',
+          event_name: eventName, 
           event_time: Math.floor(Date.now() / 1000),
-          event_id: order_id,
+          event_id: order_id, 
           action_source: 'website',
+          test_event_code: 'TEST14695', 
           custom_data: {
             value: value,
             currency: currency,
@@ -53,14 +62,12 @@ export default async function handler(req, res) {
       ]
     };
 
-    // 2. Variáveis de Ambiente
     const PIXEL_ID = process.env.FB_PIXEL_ID;
     const ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
 
+    console.log(`ENVIANDO PARA FACEBOOK: ${eventName}`);
     console.log('TOKEN STATUS:', ACCESS_TOKEN ? 'OK' : 'MISSING');
-    console.log('PIXEL ID:', PIXEL_ID || 'UNDEFINED');
 
-    // 3. Envio para o Facebook (Token na URL garante maior compatibilidade)
     const fbRes = await fetch(
       `https://graph.facebook.com/v19.0/${PIXEL_ID}/events?access_token=${ACCESS_TOKEN}`,
       {
@@ -71,11 +78,11 @@ export default async function handler(req, res) {
     );
 
     const fbData = await fbRes.json();
-
     console.log('--- RESPOSTA FACEBOOK ---', fbData);
 
     return res.status(200).json({
       success: true,
+      event_sent: eventName,
       fb_response: fbData
     });
 
