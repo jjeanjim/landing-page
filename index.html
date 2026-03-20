@@ -223,14 +223,33 @@
 
     <!-- DOWNLOAD ZONE -->
     <div class="download-zone">
-        <h2 style="color: #fff; margin-bottom: 20px;">JUNTE-SE À NÓS!</h2>
-        <a href="https://pay.kiwify.com.br/M9T4tsE"
-           class="btn-download"
-           onclick="fbq('track', 'InitiateCheckout'); setTimeout(() => {}, 600);">>
-           Comunidade Ativa
-        </a>
-        <span class="download-code">> EXECUTING DOWNLOAD PROTOCOL... [v1.0]</span>
-    </div>
+    <h2 style="color: #fff; margin-bottom: 20px;">JUNTE-SE À NÓS!</h2>
+    <a href="https://pay.kiwify.com.br/M9T4tsE"
+       class="btn-download"
+       id="compra-comunidade">
+       Comunidade Ativa
+    </a>
+    <span class="download-code">> EXECUTING DOWNLOAD PROTOCOL... [v1.0]</span>
+</div>
+
+    <script>
+    document.getElementById('compra-comunidade').addEventListener('click', function(e) {
+        
+        e.preventDefault();
+        const linkKiwify = this.href;
+
+        
+        if (typeof fbq !== 'undefined') {
+            fbq('track', 'InitiateCheckout');
+            console.log('Hajime Sec: Evento enviado!');
+        }
+
+        
+        setTimeout(() => {
+            window.location.href = linkKiwify;
+        }, 400);
+    });
+</script>
 
     <!-- MODULES -->
     <div class="modules-grid">
